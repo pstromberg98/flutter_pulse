@@ -1,3 +1,5 @@
+![Logo](https://github.com/pstromberg98/flutter_pulse/blob/master/logo.png)
+
 # Flutter Pulse
 
 CURRENTLY UNDER CONSTRUACTION
