@@ -18,7 +18,7 @@ This project is inspired off of libraries like Apollo and React SWR. The focus c
 
 ## Concepts
 
-Everything is based around the idea of a "pulse". A pulse is an object that represents a fetchable data source. Multiple listeners can be subscribe to the same pulse and they are all fed the same data as it changes (this is the synchronization part). The pulses are created two ways
+Everything is based around the idea of a "pulse". A pulse is an object that represents a fetchable data source. Multiple listeners can be subscribed to the same pulse and they are all fed the same data as it changes (this is the synchronization part). The pulses are created two ways
 - `Pulse('example', () => Future.value('example')` 
 - `usePulse('example, Future.value('example')`
 
