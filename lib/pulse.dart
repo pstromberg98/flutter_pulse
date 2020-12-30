@@ -1,33 +1,42 @@
-typedef PulseListener<T> = void Function(T value);
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
+import 'package:rxdart/rxdart.dart';
+
+typedef PulseListener<T> = void Function(AsyncSnapshot<T> value);
 typedef PulseSource<T> = Future<T> Function();
 
 class Pulse<T> {
-  final List<PulseListener<T>> listeners = [];
-
-  T get latestValue => _latestValue;
   String get key => _key;
+  AsyncSnapshot<T> get latestValue => _stateStream.value;
 
   final PulseSource<T> _source;
   final String _key;
-  T _latestValue;
+
+  final BehaviorSubject<AsyncSnapshot<T>> _stateStream =
+      BehaviorSubject.seeded(AsyncSnapshot.nothing());
 
   Pulse(this._key, this._source);
 
   Future<T> hydrate() {
+    _stateStream.add(AsyncSnapshot.waiting());
     return _source().then((value) {
-      listeners.forEach((listener) {
-        _latestValue = value;
-        listener(value);
-      });
+      // If source fetch succeed
+      _stateStream.add(AsyncSnapshot.withData(
+        ConnectionState.active,
+        value,
+      ));
       return value;
+    }).catchError((err) {
+      // If source fetch fails
+      _stateStream.add(AsyncSnapshot.withError(
+        ConnectionState.done,
+        err,
+      ));
     });
   }
 
-  void addListener(PulseListener<T> listener) {
-    listeners.add(listener);
-  }
-
-  void removeListener(PulseListener<T> listener) {
-    listeners.remove(listener);
+  StreamSubscription listen(PulseListener<T> listener) {
+    return _stateStream.listen(listener);
   }
 }

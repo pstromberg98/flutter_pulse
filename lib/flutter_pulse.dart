@@ -1,7 +1,4 @@
-library flutter_pulse;
-
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'package:flutter_pulse/pulse_cache.dart';
+export 'package:flutter_pulse/pulse_hooks.dart';
+export 'package:flutter_pulse/pulse_widgets.dart';
+export 'package:flutter_pulse/pulse.dart';

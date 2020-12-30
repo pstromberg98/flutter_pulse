@@ -9,14 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_pulse/flutter_pulse.dart';
 
 void main() {
-  test('adds one to input values', () {
-    final calculator = Calculator();
-    expect(calculator.addOne(2), 3);
-    expect(calculator.addOne(-7), -6);
-    expect(calculator.addOne(0), 1);
-    expect(() => calculator.addOne(null), throwsNoSuchMethodError);
-  });
-
   test('Create a pulse', () async {
     final pulse = Pulse<String>(
       'delayed-hello',
@@ -29,12 +21,16 @@ void main() {
       ),
     );
 
-    pulse.addListener((value) {
-      expect(value, 'Hello');
+    pulse.listen((snapshot) {
+      if (snapshot.hasData) {
+        expect(snapshot.data, 'Hello');
+      }
     });
 
-    pulse.addListener((value) {
-      expect(value, 'Hello');
+    pulse.listen((snapshot) {
+      if (snapshot.hasData) {
+        expect(snapshot.data, 'Hello');
+      }
     });
 
     await pulse.hydrate();
@@ -45,23 +41,31 @@ void main() {
     final pulse = Pulse('name', () => Future.value('Parker'));
 
     pulseCache.addPulse(pulse);
-    pulseCache.findPulse<String>('name').addListener((value) {
-      expect(value, 'Parker');
+    pulseCache.findPulse<String>('name').listen((snapshot) {
+      if (snapshot.hasData) {
+        expect(snapshot.data, 'Parker');
+      }
     });
 
     await pulse.hydrate();
   });
 
   testWidgets('Pulse hook', (tester) async {
-    tester.pumpWidget(
+    await tester.pumpFrames(
       PulseCacheProvider(
         child: HookBuilder(
           builder: (ctx) {
-            final name = usePulse('name', () => Future.value('Parker'));
+            final nameSnapshot = usePulse(
+              'name',
+              () => Future.delayed(Duration(milliseconds: 100))
+                  .then((_) => 'Parker'),
+            );
+            print(nameSnapshot.connectionState.toString());
             return Container();
           },
         ),
       ),
+      Duration(milliseconds: 400),
     );
   });
 }

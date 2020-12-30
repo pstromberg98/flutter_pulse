@@ -4,7 +4,7 @@ import 'package:flutter_pulse/pulse.dart';
 import 'package:flutter_pulse/pulse_cache.dart';
 import 'package:provider/provider.dart';
 
-class _PulseHook<T> extends Hook<T> {
+class _PulseHook<T> extends Hook<AsyncSnapshot<T>> {
   final String key;
   final PulseSource<T> source;
   final PulseCache cache;
@@ -16,11 +16,13 @@ class _PulseHook<T> extends Hook<T> {
   ]);
 
   @override
-  HookState<T, Hook<T>> createState() => _PulseHookState<T>();
+  HookState<AsyncSnapshot<T>, Hook<AsyncSnapshot<T>>> createState() =>
+      _PulseHookState<T>();
 }
 
-class _PulseHookState<T> extends HookState<T, _PulseHook<T>> {
-  T latestValue;
+class _PulseHookState<T> extends HookState<AsyncSnapshot<T>, _PulseHook<T>> {
+  AsyncSnapshot<T> latestValue;
+  Function _dispose;
 
   @override
   void initHook() {
@@ -33,26 +35,32 @@ class _PulseHookState<T> extends HookState<T, _PulseHook<T>> {
       cache.addPulse(targetPulse);
     }
 
-    targetPulse.addListener(_listener);
+    latestValue = targetPulse.latestValue;
+
+    final subscription = targetPulse.listen(_listener);
+    _dispose = subscription.cancel;
+
+    targetPulse.hydrate();
   }
 
   @override
   void dispose() {
-    final cache = hook.cache;
-    final targetPulse = cache.findPulse(hook.key);
-    targetPulse.removeListener(_listener);
+    if (_dispose != null) {
+      _dispose();
+    }
+
     super.dispose();
   }
 
   @override
-  T build(BuildContext context) => latestValue;
+  AsyncSnapshot<T> build(BuildContext context) => latestValue;
 
-  void _listener(T value) {
+  void _listener(AsyncSnapshot<T> value) {
     setState(() => latestValue = value);
   }
 }
 
-T usePulse<T>(String key, [PulseSource<T> source]) {
+AsyncSnapshot<T> usePulse<T>(String key, [PulseSource<T> source]) {
   final cache = Provider.of<PulseCache>(useContext());
   return use(_PulseHook<T>(key, cache, source));
 }
