@@ -2,7 +2,7 @@
 
 # Flutter Pulse
 
-CURRENTLY UNDER CONSTRUACTION
+CURRENTLY UNDER CONSTRUCTION
 
 Flutter pulse is a library that tackles data synchronization.
 
