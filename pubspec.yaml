@@ -1,8 +1,7 @@
 name: flutter_pulse
 description: Data Synchronization
-version: 0.0.5
-author:
-homepage:
+version: 0.0.6
+homepage: https://github.com/pstromberg98/flutter_pulse
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
